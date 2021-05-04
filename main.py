@@ -4,8 +4,8 @@ from utils import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-SAMPLE_NUM = 10000
-NO_OF_PATHS = 4
+SAMPLE_NUM = 100000
+NO_OF_PATHS = 8
 SNR_INDEX_LIMIT = 5
 FADING="Rayleigh"
 TYPE="egc"
@@ -39,17 +39,16 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_index
                 print("No fading channel type given.")
                 return -1
             
-            # print(gain.mean(axis=0).mean(axis=0).mean(axis=0))
             gain_qpsk = np.tile(gain,[2,1,1])
 
-            transmitted_signal = np.dstack((data, ) * L)
+            transmitted_signal = np.dstack((qpsk_data, ) * L) # ??????? BRUH did i just stack data instead of qpsk_data
             received_signal = gain_qpsk * transmitted_signal + noise
-            # print(received_signal.mean(axis=0).mean(axis=0).mean(axis=0))
 
             Pe[SNR_index, L-1], _ = equal_gain(gain_qpsk, received_signal, sample_num, qpsk_data)
     
     plt.plot(SNR_dB_list, Pe)
-    # plt.legend()
-    # plt.show()
+    plt.yscale("log")
+    plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
+    plt.show()
 
 simulate_combining()
