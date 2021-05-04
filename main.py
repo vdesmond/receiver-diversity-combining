@@ -23,7 +23,9 @@ TYPE="egc"
 def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arange=SNR_ARANGE, fading=FADING, type=TYPE):
    
     SNR_dB_list = np.arange(*snr_arange)
-    Pe = np.zeros((len(SNR_dB_list),no_of_paths))
+
+    Pe_erc = np.zeros((len(SNR_dB_list),no_of_paths))
+    Pe_mrc = np.zeros((len(SNR_dB_list),no_of_paths))
     
     for SNR_index, SNR_dB in enumerate(SNR_dB_list):
         SNR = 10 ** (SNR_dB / 10)
@@ -55,10 +57,20 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arang
             transmitted_signal = np.dstack((qpsk_data, ) * L)
             received_signal = gain_qpsk * transmitted_signal + noise
 
-            Pe[SNR_index, L-1], _ = equal_gain(gain_qpsk, received_signal, sample_num, qpsk_data)
-            logger.debug(f"BER = {Pe[SNR_index, L-1]:<10} For SNR = {SNR_index} and No of diversity branches = {L}")
+            Pe_erc[SNR_index, L-1] = equal_gain(gain_qpsk, received_signal, sample_num, qpsk_data)
+            logger.debug(f"BER = {Pe_erc[SNR_index, L-1]:<10} For Mode :: Equal Gain, SNR = {SNR_index} and No of diversity branches = {L}")
+
+            Pe_mrc[SNR_index, L-1] = maximal_ratio(gain_qpsk, received_signal, sample_num, qpsk_data)
+            logger.debug(f"BER = {Pe_mrc[SNR_index, L-1]:<10} For Mode :: Maximal Ratio, SNR = {SNR_index} and No of diversity branches = {L}")
+
     
-    plt.plot(SNR_dB_list, Pe)
+    plt.plot(SNR_dB_list, Pe_erc)
+    plt.yscale("log")
+    plt.xticks(SNR_dB_list)
+    plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
+    plt.show()
+
+    plt.plot(SNR_dB_list, Pe_mrc)
     plt.yscale("log")
     plt.xticks(SNR_dB_list)
     plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
