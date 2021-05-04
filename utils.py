@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import numpy as np 
+import numpy as np
 
 def get_ber(A, B, sample_num):
-    # * error wasnt even here
-    error_count = np.count_nonzero(A==B)
-    Pe = error_count/sample_num/2
+    error_count = np.count_nonzero(A!=B)
+    Pe = (error_count/sample_num) * 2
     return Pe
 
 def equal_gain(g2, r, sample_num, data):
