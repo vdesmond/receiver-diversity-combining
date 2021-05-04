@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from utils import *
+from temp_utils import *
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -25,13 +26,11 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_index
         
         for L in range(1,no_of_paths+1):
 
-            noise = np.random.normal(0,np.sqrt(E_noise/2), size = (2,sample_num,L)) + \
-                    ((0+1j)*np.random.normal(0,np.sqrt(E_noise/2),size = (2,sample_num,L)))
-           
+            noise = load_mat(L, SNR_index, n=True)
 
             if fading == "Rayleigh":
-                gain = np.random.normal(0, 1/np.sqrt(2), size = (1,sample_num,L)) + \
-                    ((0+1j)*np.random.normal(0 ,1/2 ,size = (1,sample_num,L)))
+                gain = load_mat(L, SNR_index, n=False)
+            # ? dont care about rician for now
             elif fading == "Rician":
                 gain = np.random.normal(1/2, 1/2, size = (1,sample_num,L)) + \
                     ((0+1j)*np.random.normal(1/np.sqrt(2), 1/2 ,size = (1,sample_num,L)))
@@ -39,17 +38,17 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_index
                 print("No fading channel type given.")
                 return -1
             
-            # print(gain.mean(axis=0).mean(axis=0).mean(axis=0))
+            # print(noise.mean(axis=0).mean(axis=0).mean(axis=0))
             gain_qpsk = np.tile(gain,[2,1,1])
 
-            transmitted_signal = np.dstack((data, ) * L)
+            transmitted_signal = np.dstack((qpsk_data, ) * L)
             received_signal = gain_qpsk * transmitted_signal + noise
-            # print(received_signal.mean(axis=0).mean(axis=0).mean(axis=0))
+            # print(transmitted_signal.mean(axis=0).mean(axis=0))
 
             Pe[SNR_index, L-1], _ = equal_gain(gain_qpsk, received_signal, sample_num, qpsk_data)
     
     plt.plot(SNR_dB_list, Pe)
-    # plt.legend()
-    # plt.show()
+    plt.legend()
+    plt.show()
 
 simulate_combining()
