@@ -28,6 +28,23 @@ def direct(gain_qpsk, rec_data, sample_num, data):
     ber_dir = get_bit_error_rate(result_dir, data, sample_num)
     return ber_dir
 
+def selective(gain_qpsk, rec_data, sample_num, data):
+    max_gain_index = np.argmax(np.absolute(gain_qpsk[1:]), axis=2)
+
+    rec_data_temp = np.zeros((2,sample_num), dtype = 'complex_')
+    gain_qpsk_temp = np.zeros((2,sample_num), dtype = 'complex_')
+
+    for i in range(sample_num):
+        rec_data_temp[:,i] = rec_data[:,i,int(max_gain_index[:, i])]
+        gain_qpsk_temp[:,i] = gain_qpsk[:,i,int(max_gain_index[:, i])]
+    
+    rec_sel = np.exp( 0-1j * np.angle(gain_qpsk_temp)) * rec_data[:,:,0]
+    rec_sel_real = np.real(rec_sel)
+    result_sel = qpsk_detection(rec_sel_real)
+    
+    ber_sel = get_bit_error_rate(result_sel, data, sample_num)
+    return ber_sel
+
 def qpsk_detection(data):
     return (data > 0).astype(int) * 2 - 1
 

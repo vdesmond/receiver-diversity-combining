@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from utils import *
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
+import time
+from utils import equal_gain, maximal_ratio, direct, selective, check_modes
 
 # ? Configure logging
 logger = logging.getLogger(__name__)
@@ -14,14 +15,13 @@ formatter = logging.Formatter("%(levelname)-8s :: %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-
-method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dir":("Direct",direct)}
+method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dir":("Direct",direct),"sel":("Selective",selective)}
 
 SAMPLE_NUM = 100000
 NO_OF_PATHS = 6
 SNR_ARANGE = (-5, 5, 2)
 FADING="Rician"
-MODE=("egc","mrc","dir")
+MODE=("sel",)
 
 def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arange=SNR_ARANGE, fading=FADING, mode=MODE):
    
@@ -60,7 +60,7 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arang
                 return -1
             
             gain_qpsk = np.tile(gain,[2,1,1])
-
+           
             transmitted_signal = np.dstack((qpsk_data, ) * L)
             received_signal = gain_qpsk * transmitted_signal + noise
 
@@ -77,4 +77,7 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arang
         plt.show()
 
 if __name__ =="__main__":
+    start = time.time()
     simulate_combining()
+    sim_time = time.time() - start
+    logger.debug(f"Time taken: {sim_time}s")
