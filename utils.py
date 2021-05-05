@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from itertools import chain, combinations
+from test_utils import load_mat
 
 def equal_gain(gain, rec_data, sample_num, data):
     rec_egc = np.sum(np.exp( 0-1j * np.angle(gain)) * rec_data, axis = 2)
@@ -28,13 +29,20 @@ def direct(gain_qpsk, rec_data, sample_num, data):
     ber_dir = get_bit_error_rate(result_dir, data, sample_num)
     return ber_dir
 
-def selective(gain_qpsk, rec_data, sample_num, data):
-    max_gain_index = np.argmax(np.absolute(gain_qpsk[0:]), axis=2)
+def selective(gain_qpsk, rec_data, sample_num, data, L, SNR_index):
+    max_gain_index = np.argmax(np.absolute(gain_qpsk[1:]), axis=2)
 
     rec_data_temp = np.zeros((2,sample_num), dtype = 'complex_')
     gain_qpsk_temp = np.zeros((2,sample_num), dtype = 'complex_')
 
+    r = load_mat(L, SNR_index, name="r")
+    print(r.shape)
+    print(rec_data.shape)
+    # print(np.count_nonzero(r!=rec_data))
     for i in range(sample_num):
+        # if i < 5:
+        #     print(rec_data[:,i,int(max_gain_index[:, i])])
+        #     print("\n")
         rec_data_temp[:,i] = rec_data[:,i,int(max_gain_index[:, i])]
         gain_qpsk_temp[:,i] = gain_qpsk[:,i,int(max_gain_index[:, i])]
     
