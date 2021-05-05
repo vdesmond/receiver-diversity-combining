@@ -29,7 +29,7 @@ def direct(gain_qpsk, rec_data, sample_num, data):
     return ber_dir
 
 def selective(gain_qpsk, rec_data, sample_num, data):
-    max_gain_index = np.argmax(np.absolute(gain_qpsk[1:]), axis=2)
+    max_gain_index = np.argmax(np.absolute(gain_qpsk[0:]), axis=2)
 
     rec_data_temp = np.zeros((2,sample_num), dtype = 'complex_')
     gain_qpsk_temp = np.zeros((2,sample_num), dtype = 'complex_')
@@ -55,7 +55,7 @@ def get_bit_error_rate(arr1, arr2, sample_num):
 
 def check_modes(mode):
     sorted_mode = tuple(sorted(mode))
-    all_modes = ("dir","egc","mrc","sel")
+    all_modes = ("dirc","egc","mrc","selc")
     all_combs = list(chain(*(list(combinations(all_modes, i + 1)) for i in range(len(all_modes)))))
     if sorted_mode in all_combs:
         return sorted_mode

@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import time
+from cycler import cycler
+from matplotlib.colors import hsv_to_rgb
 from utils import equal_gain, maximal_ratio, direct, selective, check_modes
 
 # ? Configure logging
@@ -15,16 +17,19 @@ formatter = logging.Formatter("%(levelname)-8s :: %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dir":("Direct",direct),"sel":("Selective",selective)}
+# ? Configure plotting
+plt.style.use('seaborn-darkgrid')
+plt.rcParams['font.family'] = 'DeJavu Serif'
+plt.rcParams['font.serif'] = ['Computer Modern']
+plt.rcParams['figure.figsize'] = 13, 7
 
-SAMPLE_NUM = 100000
-NO_OF_PATHS = 6
-SNR_ARANGE = (-5, 5, 2)
-FADING="Rician"
-MODE=("sel",)
+# ? For choosing function and in logs
+method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dirc":("Direct",direct),"selc":("Selective",selective)}
 
-def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arange=SNR_ARANGE, fading=FADING, mode=MODE):
-   
+def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
+
+    start = time.time()
+
     SNR_dB_list = np.arange(*snr_arange)
 
     mode_n =  check_modes(mode)
@@ -68,16 +73,29 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arang
                 BER[SNR_index, L-1, BER_index] = method_dict[method][1](gain_qpsk, received_signal, sample_num, qpsk_data)
                 logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_index:<5} No of diversity branches = {L}")
 
-    
-    for index in range(len(mode_n)):
-        plt.plot(SNR_dB_list, BER[:,:,index])
-        plt.yscale("log")
-        plt.xticks(SNR_dB_list)
-        plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
-        plt.show()
-
-if __name__ =="__main__":
-    start = time.time()
-    simulate_combining()
     sim_time = time.time() - start
     logger.debug(f"Time taken: {sim_time}s")
+
+    for ind, m in enumerate(mode_n):
+        plt.plot(SNR_dB_list, BER[:,:,ind], ':o')
+        plt.yscale("log")
+        plt.xticks(SNR_dB_list)
+        
+        plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
+        plt.figtext(.5,.9,f"{method_dict[m][0]} Combining - R{fading[1:]}", fontsize=20, ha='center')
+        plt.xlabel("SNR (in dB)")
+        plt.ylabel("BER")
+        plt.savefig(f"./docs/{method_dict[m][0]} Combining - R{fading[1:]}.png")
+        plt.clf()
+        
+
+if __name__ =="__main__":
+
+    SAMPLE_NUM = 100000
+    NO_OF_PATHS = 5
+    SNR_ARANGE = (-7, 5, 2)
+    FADING="rayleigh"
+    MODE=("selc",)
+
+    simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,FADING,MODE)
+    
