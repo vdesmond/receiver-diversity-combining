@@ -14,18 +14,25 @@ formatter = logging.Formatter("%(levelname)-8s :: %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+
+method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dir":("Direct",direct)}
+
 SAMPLE_NUM = 100000
 NO_OF_PATHS = 6
 SNR_ARANGE = (-5, 5, 2)
 FADING="Rician"
-TYPE="egc"
+MODE=("egc","mrc","dir")
 
-def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arange=SNR_ARANGE, fading=FADING, type=TYPE):
+def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arange=SNR_ARANGE, fading=FADING, mode=MODE):
    
     SNR_dB_list = np.arange(*snr_arange)
 
-    Pe_erc = np.zeros((len(SNR_dB_list),no_of_paths))
-    Pe_mrc = np.zeros((len(SNR_dB_list),no_of_paths))
+    mode_n =  check_modes(mode)
+    if not mode_n:
+        logger.error(f"Error in mode: {mode}")
+        return -1
+
+    BER = np.zeros((len(SNR_dB_list),no_of_paths,len(mode_n)))
     
     for SNR_index, SNR_dB in enumerate(SNR_dB_list):
         SNR = 10 ** (SNR_dB / 10)
@@ -57,24 +64,17 @@ def simulate_combining(sample_num=SAMPLE_NUM, no_of_paths=NO_OF_PATHS, snr_arang
             transmitted_signal = np.dstack((qpsk_data, ) * L)
             received_signal = gain_qpsk * transmitted_signal + noise
 
-            Pe_erc[SNR_index, L-1] = equal_gain(gain_qpsk, received_signal, sample_num, qpsk_data)
-            logger.debug(f"BER = {Pe_erc[SNR_index, L-1]:<10} For Mode :: Equal Gain, SNR = {SNR_index} and No of diversity branches = {L}")
-
-            Pe_mrc[SNR_index, L-1] = maximal_ratio(gain_qpsk, received_signal, sample_num, qpsk_data)
-            logger.debug(f"BER = {Pe_mrc[SNR_index, L-1]:<10} For Mode :: Maximal Ratio, SNR = {SNR_index} and No of diversity branches = {L}")
+            for BER_index, method in enumerate(mode_n):
+                BER[SNR_index, L-1, BER_index] = method_dict[method][1](gain_qpsk, received_signal, sample_num, qpsk_data)
+                logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_index:<5} No of diversity branches = {L}")
 
     
-    plt.plot(SNR_dB_list, Pe_erc)
-    plt.yscale("log")
-    plt.xticks(SNR_dB_list)
-    plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
-    plt.show()
-
-    plt.plot(SNR_dB_list, Pe_mrc)
-    plt.yscale("log")
-    plt.xticks(SNR_dB_list)
-    plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
-    plt.show()
+    for index in range(len(mode_n)):
+        plt.plot(SNR_dB_list, BER[:,:,index])
+        plt.yscale("log")
+        plt.xticks(SNR_dB_list)
+        plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
+        plt.show()
 
 if __name__ =="__main__":
     simulate_combining()
