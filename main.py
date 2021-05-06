@@ -26,6 +26,44 @@ plt.rcParams['figure.figsize'] = 13, 7
 # ? For choosing function and in logs
 method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dirc":("Direct",direct),"selc":("Selective",selective)}
 
+def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
+    for ind, m in enumerate(mode_n):
+        plt.plot(SNR_dB_list, BER[:,:,ind], ':o')
+        plt.yscale("log")
+        plt.xticks(SNR_dB_list)
+        
+        plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
+        plt.figtext(.5,.9,f"{method_dict[m][0]} Combining - R{fading[1:]}", fontsize=20, ha='center')
+        plt.xlabel("SNR (in dB)")
+        plt.ylabel("BER")
+        plt.savefig(f"./docs/{method_dict[m][0]} Combining - R{fading[1:]}.png")
+        plt.clf()
+
+def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
+    BER_rayleigh, mode_n, SNR_dB_list, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rayleigh", mode)
+    BER_rician, _, _, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rician", mode)
+
+    for ind, m in enumerate(mode_n):
+        
+        plt.plot(SNR_dB_list, BER_rayleigh[:,:,ind], '--o')
+        plt.gca().set_prop_cycle(None)
+        plt.plot(SNR_dB_list, BER_rician[:,:,ind], '-.*')
+        plt.yscale("log")
+        plt.xticks(SNR_dB_list)
+
+        lines = plt.gca().get_lines()
+        legend1 = plt.legend([lines[i] for i in range(0,no_of_paths)], [f"L={l}" for l in range(1,no_of_paths+1)], loc=1,frameon=True,  facecolor='white', framealpha=0.8)
+        legend2 = plt.legend([lines[i] for i in [0,no_of_paths]], ["Rayleigh", "Rician"], loc=3,frameon=True,  facecolor='white', framealpha=0.8)
+        plt.gca().add_artist(legend1)
+        plt.gca().add_artist(legend2)
+                
+        plt.figtext(.5,.9,f"{method_dict[m][0]} Combining - Rayleigh vs Rician", fontsize=20, ha='center')
+        plt.xlabel("SNR (in dB)")
+        plt.ylabel("BER")
+        plt.savefig(f"./docs/{method_dict[m][0]} Combining - Rayleigh vs Rician.png")
+        
+        plt.clf()
+
 def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
 
     start = time.time()
@@ -76,26 +114,20 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
     sim_time = time.time() - start
     logger.debug(f"Time taken: {sim_time}s")
 
-    for ind, m in enumerate(mode_n):
-        plt.plot(SNR_dB_list, BER[:,:,ind], ':o')
-        plt.yscale("log")
-        plt.xticks(SNR_dB_list)
-        
-        plt.legend([f"L={l}" for l in range(1,no_of_paths+1)])
-        plt.figtext(.5,.9,f"{method_dict[m][0]} Combining - R{fading[1:]}", fontsize=20, ha='center')
-        plt.xlabel("SNR (in dB)")
-        plt.ylabel("BER")
-        plt.savefig(f"./docs/{method_dict[m][0]} Combining - R{fading[1:]}.png")
-        plt.clf()
+    return BER, mode_n, SNR_dB_list, fading, no_of_paths
         
 
 if __name__ =="__main__":
 
     SAMPLE_NUM = 100000
-    NO_OF_PATHS = 5
+    NO_OF_PATHS = 3
     SNR_ARANGE = (-7, 5, 2)
-    FADING="rician"
     MODE=("mrc", "egc", "dirc", "selc",)
-
-    simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,FADING,MODE)
+    PLOT_TYPE = "channel_comparision"
     
+    if PLOT_TYPE == "independent":
+        indeplot(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rayleigh",MODE))
+        indeplot(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rician",MODE))
+        
+    if PLOT_TYPE == "channel_comparision":
+        combiplot_fading(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,MODE)
