@@ -94,8 +94,8 @@ if __name__ =="__main__":
     SAMPLE_NUM = 100000
     NO_OF_PATHS = 5
     SNR_ARANGE = (-7, 5, 2)
-    FADING="rayleigh"
-    MODE=("selc",)
+    FADING="rician"
+    MODE=("mrc", "egc", "dirc", "selc",)
 
     simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,FADING,MODE)
     
