@@ -4,6 +4,18 @@ import numpy as np
 from itertools import chain, combinations
 
 def equal_gain(gain, rec_data, sample_num, data):
+    """
+    This function calculates BER for Equal Gain Combining
+
+    Args:
+        gain (ndarray): Channel Fading Gain matrix of dimensions (2, sample_num, L)
+        rec_data (ndarray): Receiver data matrix of dimensions (2, sample_num, L)
+        sample_num (int): Number of samples
+        data (ndarray): QPSK data matrix of dimensions (2, sample_num, L)
+
+    Returns:
+        [float]: Bit Error Rate for Equal Gain Combining
+    """
     rec_egc = np.sum(np.exp( 0-1j * np.angle(gain)) * rec_data, axis = 2)
     rec_egc_real = np.real(rec_egc)
     result_egc = qpsk_detection(rec_egc_real)
@@ -12,6 +24,18 @@ def equal_gain(gain, rec_data, sample_num, data):
     return ber_egc
 
 def maximal_ratio(gain, rec_data, sample_num, data):
+    """
+    This function calculates BER for Maximal Ratio Combining
+
+    Args:
+        gain (ndarray): Channel Fading Gain matrix of dimensions (2, sample_num, L)
+        rec_data (ndarray): Receiver data matrix of dimensions (2, sample_num, L)
+        sample_num (int): Number of samples
+        data (ndarray): QPSK data matrix of dimensions (2, sample_num, L)
+
+    Returns:
+        [float]: Bit Error Rate for Maximal Ratio Combining
+    """
     rec_mrc = np.sum(gain.conjugate() * rec_data, axis=2)
     rec_mrc_real = np.real(rec_mrc)
     result_mrc = qpsk_detection(rec_mrc_real)
@@ -20,6 +44,18 @@ def maximal_ratio(gain, rec_data, sample_num, data):
     return ber_mrc
 
 def direct(gain_qpsk, rec_data, sample_num, data):
+    """
+    This function calculates BER for Direct Combining
+
+    Args:
+        gain (ndarray): Placeholer argument as gain matrix is not needed
+        rec_data (ndarray): Receiver data matrix of dimensions (2, sample_num, L)
+        sample_num (int): Number of samples
+        data (ndarray): QPSK data matrix of dimensions (2, sample_num, L)
+
+    Returns:
+        [float]: Bit Error Rate for Direct Combining
+    """
     # ? channel fading is not needed here, the argument is just a placeholder. 
     rec_dir = np.sum(rec_data, axis=2)
     rec_dir_real = np.real(rec_dir)
@@ -29,6 +65,18 @@ def direct(gain_qpsk, rec_data, sample_num, data):
     return ber_dir
 
 def selective(gain_qpsk, rec_data, sample_num, data):
+    """
+    This function calculates BER for Selective Combining
+
+    Args:
+        gain (ndarray): Channel Fading Gain matrix of dimensions (2, sample_num, L)
+        rec_data (ndarray): Receiver data matrix of dimensions (2, sample_num, L)
+        sample_num (int): Number of samples
+        data (ndarray): QPSK data matrix of dimensions (2, sample_num, L)
+
+    Returns:
+        [float]: Bit Error Rate for Selective Combining
+    """
     max_gain_index = np.argmax(np.absolute(gain_qpsk[1:]), axis=2)
 
     rec_data_temp = np.zeros((2,sample_num), dtype = 'complex_')
@@ -46,18 +94,48 @@ def selective(gain_qpsk, rec_data, sample_num, data):
     return ber_sel
 
 def qpsk_detection(data):
+    """
+    This function performs QPSK detection on given data
+
+    Args:
+        data (ndarray): Received QPSK data 
+
+    Returns:
+        [ndarray]: Detected data
+    """
     return (data > 0).astype(int) * 2 - 1
 
 def get_bit_error_rate(arr1, arr2, sample_num):
+    """
+    This function calculates Bit Error Rate by comparing 2 matrices
+    which are assumed as received data (after QPSK detection) and 
+    original data before transmission
+
+    Args:
+        arr1 (ndarray): Numpy array
+        arr2 (ndarray): Numpy array
+        sample_num (int): Number of samples
+
+    Returns:
+        [float]: Bit Error Rate
+    """
     error_count = np.count_nonzero(arr1!=arr2)
     ber = (error_count/sample_num) * 2
     return ber
 
 def check_modes(mode):
+    """
+    This function checks the mode tuple and returns a sorted tuple 
+    if all modes are valid.
+
+    Args:
+        mode (tuple): Tuple of modes to be simulated
+
+    Returns:
+        [tuple]: Sorted tuple if modes are valid else None
+    """
     sorted_mode = tuple(sorted(mode))
     all_modes = ("dirc","egc","mrc","selc")
     all_combs = list(chain(*(list(combinations(all_modes, i + 1)) for i in range(len(all_modes)))))
     if sorted_mode in all_combs:
         return sorted_mode
-    else:
-        return 0

@@ -28,6 +28,16 @@ plt.rcParams['figure.figsize'] = 13, 7
 method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dirc":("Direct",direct),"selc":("Selective",selective)}
 
 def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
+    """
+    This function plots all modes independtly and saves them in given path
+
+    Args:
+        BER (ndarray): Array containing BER for all modes
+        mode_n (tuple): Sorted tuples of modes to be plotted
+        SNR_dB_list (list): List of SNR(dB) to be plotted against
+        fading (str): Type of fading
+        no_of_paths (int): Number of branches to be simulated
+    """
     for ind, m in enumerate(mode_n):
         plt.plot(SNR_dB_list, BER[:,:,ind], ':o')
         plt.yscale("log")
@@ -41,6 +51,17 @@ def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
         plt.clf()
 
 def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
+
+    """
+    This function plots comparision of 2 fading types 
+    for all given modes and saves them in given path
+
+    Args:
+        sample_num (int): Number of samples
+        no_of_paths (int): Number of branches to be simulated
+        snr_arange (tuple): Arange type input for SNR(dB) to be simulated
+        mode (tuple): Modes to be simulated
+    """
 
     BER_rayleigh, mode_n, SNR_dB_list, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rayleigh", mode)
     BER_rician, _, _, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rician", mode)
@@ -67,7 +88,18 @@ def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
         plt.clf()
 
 def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
-    
+
+    """
+    This function plots comparision of 2 modes for all given modes
+    and saves them in given path
+
+    Args:
+        BER (ndarray): Array containing BER for all modes
+        mode_n (tuple): Sorted tuples of modes to be plotted
+        SNR_dB_list (list): List of SNR(dB) to be plotted against
+        fading (str): Type of fading to be simulated
+        no_of_paths (int): Number of branches to be simulated
+    """
     for mode_combination in list(combinations(mode_n,2)):
         mode1, mode2 = method_dict[mode_combination[0]], method_dict[mode_combination[1]]
         m1, m2 = mode_n.index(mode_combination[0]), mode_n.index(mode_combination[1])
@@ -76,7 +108,6 @@ def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
         plt.plot(SNR_dB_list, BER[:,1:,m2], '-.*')
         plt.yscale("log")
         plt.xticks(SNR_dB_list)
-
 
         lines = plt.gca().get_lines()
         legend1 = plt.legend([lines[i] for i in range(0,no_of_paths-1)], [f"L={l}" for l in range(2,no_of_paths+1)], loc=1,frameon=True,  facecolor='white', framealpha=0.8)
@@ -93,6 +124,20 @@ def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
                 
 
 def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
+
+    """
+    This function simulates receiver diversity combining for the given arguments
+
+    Args:
+        sample_num (int): Number of samples
+        no_of_paths (int): Number of branches to be simulated
+        snr_arange (tuple): Arange type input for SNR(dB) to be simulated
+        fading (str): Type of fading to be simulated
+        mode (tuple): Modes to be simulated
+
+    Returns:
+        [ndarray]: Array containing BER for all modes
+    """
 
     start = time.time()
 
@@ -131,19 +176,20 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
                 return -1
             
             gain_qpsk = np.tile(gain,[2,1,1])
+            print(gain_qpsk.shape)
            
             transmitted_signal = np.dstack((qpsk_data, ) * L)
             received_signal = gain_qpsk * transmitted_signal + noise
 
             for BER_index, method in enumerate(mode_n):
                 BER[SNR_index, L-1, BER_index] = method_dict[method][1](gain_qpsk, received_signal, sample_num, qpsk_data)
-                logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_dB:<5} No of diversity branches = {L}")
+                logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_dB:<5} No of diversity branches = {L} for fading = R{fading[1:]}")
 
     sim_time = time.time() - start
     logger.debug(f"Time taken: {sim_time}s")
 
     return BER, mode_n, SNR_dB_list, fading, no_of_paths
-        
+
 
 if __name__ =="__main__":
 
