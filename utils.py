@@ -96,7 +96,7 @@ def selective(gain_qpsk, rec_data, sample_num, data):
         rec_data_temp[:, i] = rec_data[:, i, int(max_gain_index[:, i])]
         gain_qpsk_temp[:, i] = gain_qpsk[:, i, int(max_gain_index[:, i])]
 
-    rec_sel = np.exp(0 - 1j * np.angle(gain_qpsk_temp)) * rec_data_temp  # ? im stupid
+    rec_sel = np.exp(0 - 1j * np.angle(gain_qpsk_temp)) * rec_data_temp
     rec_sel_real = np.real(rec_sel)
     result_sel = qpsk_detection(rec_sel_real)
 

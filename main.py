@@ -286,7 +286,7 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
                 logger.debug(
                     f"BER = {ber[snr_index, path-1, ber_index]:<10} For Mode ::"
                     f" {method_dict[method][0]:<15} SNR = {snr_db:<5} No of diversity"
-                    f" branches = {path:<3} for fading = R{fading[1:]}"
+                    f" branches = {path:<3} Fading = R{fading[1:]}"
                 )
 
     logger.debug(f"Time taken: {time.time() - start}s")
@@ -362,6 +362,27 @@ if __name__ == "__main__":
     SNR_ARANGE = tuple(args.snr)
     MODE = tuple(args.mode)
     PLOT_TYPE = args.plot
+
+    logger.info(
+                    f"Number of sample points: {SAMPLE_NUM}\n"
+                    f"Number of branches: {NO_OF_PATHS}\n"
+                    f"SNR(dB) to be simulated (arange): {SNR_ARANGE}\n"
+                    f"Diversity strategies: {MODE}\n"
+                    f"Plotting type: {PLOT_TYPE}\n"
+                )
+
+    if SAMPLE_NUM < 1000: 
+        logger.warn("Low number of sample points (%s), may cause inaccurate simulations", SAMPLE_NUM)
+
+    if SNR_ARANGE[2] > 10: 
+        logger.warn("Simulating for High SNR: %s can cause BER to drop to zero", SNR_ARANGE[2])
+
+    if NO_OF_PATHS > 5: 
+        logger.warn("No of branches is given as %s. This can cause plots to be cluttered", NO_OF_PATHS)
+
+    time.sleep(1)
+    logger.info("Starting Simulation")
+    time.sleep(1)
 
     if PLOT_TYPE == "independent":
         # * Remove a line if only one channel fading simulation plot is required
