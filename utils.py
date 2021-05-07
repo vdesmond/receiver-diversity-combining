@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import numpy as np
+
+"""
+Utility file containing the methods for receiver diversity combining
+along with some helper methods
+"""
 from itertools import chain, combinations
+
+import numpy as np
 
 
 def equal_gain(gain, rec_data, sample_num, data):

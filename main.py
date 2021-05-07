@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import numpy as np
-import matplotlib.pyplot as plt
+"""
+Main file containing the simulation code along with some plotting functions
+Takes in command line arguments
+"""
+
+import argparse
 import logging
 import time
-from cycler import cycler
-from matplotlib.colors import hsv_to_rgb
-from utils import (
-    equal_gain,
-    maximal_ratio,
-    direct,
-    selective,
-    check_modes,
-)
 from itertools import combinations
-import argparse
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from utils import check_modes, direct, equal_gain, maximal_ratio, selective
 
 # ? Configure logging
 logger = logging.getLogger(__name__)
@@ -40,21 +39,21 @@ method_dict = {
 }
 
 # ? indeplot, combiplot_fading and combiplot_mode are for plotting
-def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
+def indeplot(ber, mode_n, snr_db_list, fading, no_of_paths):
     """
     This function plots all modes independtly and saves them in given path
 
     Args:
         BER (ndarray): Array containing BER for all modes
         mode_n (tuple): Sorted tuples of modes to be plotted
-        SNR_dB_list (list): List of SNR(dB) to be plotted against
+        snr_db_list (list): List of SNR(dB) to be plotted against
         fading (str): Type of fading
         no_of_paths (int): Number of branches to be simulated
     """
-    for ind, m in enumerate(mode_n):
-        plt.plot(SNR_dB_list, BER[:, :, ind], ":o")
+    for ind, mode_var in enumerate(mode_n):
+        plt.plot(snr_db_list, ber[:, :, ind], ":o")
         plt.yscale("log")
-        plt.xticks(SNR_dB_list)
+        plt.xticks(snr_db_list)
 
         plt.legend(
             [f"L={l}" for l in range(1, no_of_paths + 1)],
@@ -66,13 +65,13 @@ def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
         plt.figtext(
             0.5,
             0.9,
-            f"{method_dict[m][0]} Combining - R{fading[1:]}",
+            f"{method_dict[mode_var][0]} Combining - R{fading[1:]}",
             fontsize=20,
             ha="center",
         )
         plt.xlabel("SNR (in dB)")
         plt.ylabel("BER")
-        plt.savefig(f"./docs/{method_dict[m][0]} Combining - R{fading[1:]}.png")
+        plt.savefig(f"./docs/{method_dict[mode_var][0]} Combining - R{fading[1:]}.png")
         plt.clf()
 
 
@@ -89,20 +88,20 @@ def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
         mode (tuple): Modes to be simulated
     """
 
-    BER_rayleigh, mode_n, SNR_dB_list, _, _ = simulate_combining(
+    ber_rayleigh, mode_n, snr_db_list, _, _ = simulate_combining(
         sample_num, no_of_paths, snr_arange, "rayleigh", mode
     )
-    BER_rician, _, _, _, _ = simulate_combining(
+    ber_rician, _, _, _, _ = simulate_combining(
         sample_num, no_of_paths, snr_arange, "rician", mode
     )
 
-    for ind, m in enumerate(mode_n):
+    for ind, mode_var in enumerate(mode_n):
 
-        plt.plot(SNR_dB_list, BER_rayleigh[:, :, ind], "--o")
+        plt.plot(snr_db_list, ber_rayleigh[:, :, ind], "--o")
         plt.gca().set_prop_cycle(None)
-        plt.plot(SNR_dB_list, BER_rician[:, :, ind], "-.*")
+        plt.plot(snr_db_list, ber_rician[:, :, ind], "-.*")
         plt.yscale("log")
-        plt.xticks(SNR_dB_list)
+        plt.xticks(snr_db_list)
 
         lines = plt.gca().get_lines()
         legend1 = plt.legend(
@@ -127,18 +126,20 @@ def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
         plt.figtext(
             0.5,
             0.9,
-            f"{method_dict[m][0]} Combining - Rayleigh vs Rician",
+            f"{method_dict[mode_var][0]} Combining - Rayleigh vs Rician",
             fontsize=20,
             ha="center",
         )
         plt.xlabel("SNR (in dB)")
         plt.ylabel("BER")
-        plt.savefig(f"./docs/{method_dict[m][0]} Combining - Rayleigh vs Rician.png")
+        plt.savefig(
+            f"./docs/{method_dict[mode_var][0]} Combining - Rayleigh vs Rician.png"
+        )
 
         plt.clf()
 
 
-def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
+def combiplot_mode(ber, mode_n, snr_db_list, fading, no_of_paths):
 
     """
     This function plots comparision of 2 modes for all given modes
@@ -147,7 +148,7 @@ def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
     Args:
         BER (ndarray): Array containing BER for all modes
         mode_n (tuple): Sorted tuples of modes to be plotted
-        SNR_dB_list (list): List of SNR(dB) to be plotted against
+        snr_db_list (list): List of SNR(dB) to be plotted against
         fading (str): Type of fading to be simulated
         no_of_paths (int): Number of branches to be simulated
     """
@@ -156,12 +157,14 @@ def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
             method_dict[mode_combination[0]],
             method_dict[mode_combination[1]],
         )
-        m1, m2 = mode_n.index(mode_combination[0]), mode_n.index(mode_combination[1])
-        plt.plot(SNR_dB_list, BER[:, 1:, m1], ":o")
+        mode1_index, mode2_index = mode_n.index(mode_combination[0]), mode_n.index(
+            mode_combination[1]
+        )
+        plt.plot(snr_db_list, ber[:, 1:, mode1_index], ":o")
         plt.gca().set_prop_cycle(None)
-        plt.plot(SNR_dB_list, BER[:, 1:, m2], "-.*")
+        plt.plot(snr_db_list, ber[:, 1:, mode2_index], "-.*")
         plt.yscale("log")
-        plt.xticks(SNR_dB_list)
+        plt.xticks(snr_db_list)
 
         lines = plt.gca().get_lines()
         legend1 = plt.legend(
@@ -216,7 +219,7 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
     start = time.time()
 
     # ? To generate SNR (dB) based on arange arguments
-    SNR_dB_list = np.arange(*snr_arange)
+    snr_db_list = np.arange(*snr_arange)
 
     # ? To check validity of modes
     mode_n = check_modes(mode)
@@ -225,10 +228,10 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
         return -1
 
     # ? Initialize empty array for storing BER
-    BER = np.zeros((len(SNR_dB_list), no_of_paths, len(mode_n)))
+    ber = np.zeros((len(snr_db_list), no_of_paths, len(mode_n)))
 
-    for SNR_index, SNR_dB in enumerate(SNR_dB_list):
-        SNR = 10 ** (SNR_dB / 10)
+    for snr_index, snr_db in enumerate(snr_db_list):
+        snr = 10 ** (snr_db / 10)
 
         data = np.random.rand(2, sample_num)
 
@@ -236,28 +239,30 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
         qpsk_data = 2 * (data > 0.5).astype(int) - 1
 
         # ? Setting constant Signal Power for transmission
-        E_signal = np.sqrt(2)
-        E_noise = E_signal / SNR
+        e_signal = np.sqrt(2)
+        e_noise = e_signal / snr
 
-        for L in range(1, no_of_paths + 1):
+        for path in range(1, no_of_paths + 1):
 
             # ? Generating noise based on SNR value
             noise = np.random.normal(
-                0, np.sqrt(E_noise / 2), size=(2, sample_num, L)
+                0, np.sqrt(e_noise / 2), size=(2, sample_num, path)
             ) + (
                 (0 + 1j)
-                * np.random.normal(0, np.sqrt(E_noise / 2), size=(2, sample_num, L))
+                * np.random.normal(0, np.sqrt(e_noise / 2), size=(2, sample_num, path))
             )
 
             # ? Generating channel fading gain
             if fading.lower() == "rayleigh":
-                gain = np.random.normal(0, 1 / np.sqrt(2), size=(1, sample_num, L)) + (
-                    (0 + 1j) * np.random.normal(0, 1 / 2, size=(1, sample_num, L))
-                )
+                gain = np.random.normal(
+                    0, 1 / np.sqrt(2), size=(1, sample_num, path)
+                ) + ((0 + 1j) * np.random.normal(0, 1 / 2, size=(1, sample_num, path)))
             elif fading.lower() == "rician":
-                gain = np.random.normal(1 / 2, 1 / 2, size=(1, sample_num, L)) + (
+                gain = np.random.normal(1 / 2, 1 / 2, size=(1, sample_num, path)) + (
                     (0 + 1j)
-                    * np.random.normal(1 / np.sqrt(2), 1 / 2, size=(1, sample_num, L))
+                    * np.random.normal(
+                        1 / np.sqrt(2), 1 / 2, size=(1, sample_num, path)
+                    )
                 )
             else:
                 logger.error(f"{fading} fading channel is not defined.")
@@ -267,27 +272,26 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
             gain_qpsk = np.tile(gain, [2, 1, 1])
 
             # ? Tiling QPSK data to simulate L branches
-            transmitted_signal = np.dstack((qpsk_data,) * L)
+            transmitted_signal = np.dstack((qpsk_data,) * path)
 
             # ? Simulating Received signal
             received_signal = gain_qpsk * transmitted_signal + noise
 
-            for BER_index, method in enumerate(mode_n):
+            for ber_index, method in enumerate(mode_n):
 
                 # ? Calculating BER for given modes
-                BER[SNR_index, L - 1, BER_index] = method_dict[method][1](
+                ber[snr_index, path - 1, ber_index] = method_dict[method][1](
                     gain_qpsk, received_signal, sample_num, qpsk_data
                 )
                 logger.debug(
-                    f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode ::"
-                    f" {method_dict[method][0]:<15} SNR = {SNR_dB:<5} No of diversity"
-                    f" branches = {L:<3} for fading = R{fading[1:]}"
+                    f"BER = {ber[snr_index, path-1, ber_index]:<10} For Mode ::"
+                    f" {method_dict[method][0]:<15} SNR = {snr_db:<5} No of diversity"
+                    f" branches = {path:<3} for fading = R{fading[1:]}"
                 )
 
-    sim_time = time.time() - start
-    logger.debug(f"Time taken: {sim_time}s")
+    logger.debug(f"Time taken: {time.time() - start}s")
 
-    return BER, mode_n, SNR_dB_list, fading, no_of_paths
+    return ber, mode_n, snr_db_list, fading, no_of_paths
 
 
 if __name__ == "__main__":
@@ -333,7 +337,7 @@ if __name__ == "__main__":
         "--mode",
         help="Receiver Diversity strategies to be simulated. Default: egc mrc selc",
         nargs="*",
-        metavar=("M1", "M2"),
+        metavar=("", "M2"),
         type=str,
         default=["egc", "mrc", "selc"],
     )
