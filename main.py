@@ -7,6 +7,7 @@ import time
 from cycler import cycler
 from matplotlib.colors import hsv_to_rgb
 from utils import equal_gain, maximal_ratio, direct, selective, check_modes
+from itertools import combinations
 
 # ? Configure logging
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
         plt.clf()
 
 def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
+
     BER_rayleigh, mode_n, SNR_dB_list, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rayleigh", mode)
     BER_rician, _, _, _, _ = simulate_combining(sample_num, no_of_paths, snr_arange, "rician", mode)
 
@@ -63,6 +65,32 @@ def combiplot_fading(sample_num, no_of_paths, snr_arange, mode):
         plt.savefig(f"./docs/{method_dict[m][0]} Combining - Rayleigh vs Rician.png")
         
         plt.clf()
+
+def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
+    
+    for mode_combination in list(combinations(mode_n,2)):
+        mode1, mode2 = method_dict[mode_combination[0]], method_dict[mode_combination[1]]
+        m1, m2 = mode_n.index(mode_combination[0]), mode_n.index(mode_combination[1])
+        plt.plot(SNR_dB_list, BER[:,1:,m1], ':o')
+        plt.gca().set_prop_cycle(None)
+        plt.plot(SNR_dB_list, BER[:,1:,m2], '-.*')
+        plt.yscale("log")
+        plt.xticks(SNR_dB_list)
+
+
+        lines = plt.gca().get_lines()
+        legend1 = plt.legend([lines[i] for i in range(0,no_of_paths-1)], [f"L={l}" for l in range(2,no_of_paths+1)], loc=1,frameon=True,  facecolor='white', framealpha=0.8)
+        legend2 = plt.legend([lines[i] for i in [0,no_of_paths-1]], [mode1[0], mode2[0]], loc=3,frameon=True,  facecolor='white', framealpha=0.8)
+        plt.gca().add_artist(legend1)
+        plt.gca().add_artist(legend2)
+
+        plt.figtext(.5,.9,f"{mode1[0]} vs {mode2[0]} Combining - R{fading[1:]}", fontsize=20, ha='center')
+        plt.xlabel("SNR (in dB)")
+        plt.ylabel("BER")
+        plt.savefig(f"./docs/{mode1[0]} vs {mode2[0]} Combining - R{fading[1:]}.png")
+        
+        plt.clf()
+                
 
 def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
 
@@ -120,10 +148,10 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
 if __name__ =="__main__":
 
     SAMPLE_NUM = 100000
-    NO_OF_PATHS = 3
+    NO_OF_PATHS = 5
     SNR_ARANGE = (-7, 5, 2)
-    MODE=("mrc", "egc", "dirc", "selc",)
-    PLOT_TYPE = "channel_comparision"
+    MODE=("mrc", "egc", "selc",)
+    PLOT_TYPE = "mode_comparision"
     
     if PLOT_TYPE == "independent":
         indeplot(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rayleigh",MODE))
@@ -131,3 +159,10 @@ if __name__ =="__main__":
         
     if PLOT_TYPE == "channel_comparision":
         combiplot_fading(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,MODE)
+
+    if PLOT_TYPE == "mode_comparision":
+        if len(MODE) < 2:
+            logger.error("Mode comparision requires a minimum of 2 modes.")
+        else:
+            combiplot_mode(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rayleigh",MODE))
+            combiplot_mode(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rician",MODE))
