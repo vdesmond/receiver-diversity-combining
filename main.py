@@ -8,6 +8,7 @@ from cycler import cycler
 from matplotlib.colors import hsv_to_rgb
 from utils import equal_gain, maximal_ratio, direct, selective, check_modes
 from itertools import combinations
+import argparse
 
 # ? Configure logging
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ plt.rcParams['figure.figsize'] = 13, 7
 # ? For choosing function and in logs
 method_dict = {"egc":("Equal Gain", equal_gain),"mrc":("Maximal Ratio", maximal_ratio), "dirc":("Direct",direct),"selc":("Selective",selective)}
 
+# ? indeplot, combiplot_fading and combiplot_mode are for plotting
 def indeplot(BER, mode_n, SNR_dB_list, fading, no_of_paths):
     """
     This function plots all modes independtly and saves them in given path
@@ -122,7 +124,6 @@ def combiplot_mode(BER, mode_n, SNR_dB_list, fading, no_of_paths):
         
         plt.clf()
                 
-
 def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
 
     """
@@ -138,33 +139,40 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
     Returns:
         [ndarray]: Array containing BER for all modes
     """
-
+    # ? To calculate simulation time
     start = time.time()
 
+    # ? To generate SNR (dB) based on arange arguments
     SNR_dB_list = np.arange(*snr_arange)
 
+    # ? To check validity of modes
     mode_n =  check_modes(mode)
     if not mode_n:
         logger.error(f"Error in mode: {mode}")
         return -1
 
+    # ? Initialize empty array for storing BER
     BER = np.zeros((len(SNR_dB_list),no_of_paths,len(mode_n)))
     
     for SNR_index, SNR_dB in enumerate(SNR_dB_list):
         SNR = 10 ** (SNR_dB / 10)
 
         data = np.random.rand(2, sample_num)
+
+        # ? QPSK Modulation
         qpsk_data = 2 * (data > 0.5).astype(int) -1
 
+        # ? Setting constant Signal Power for transmission
         E_signal = np.sqrt(2)
         E_noise = E_signal/ SNR 
         
         for L in range(1,no_of_paths+1):
 
+            # ? Generating noise based on SNR value
             noise = np.random.normal(0,np.sqrt(E_noise/2), size = (2,sample_num,L)) + \
                     ((0+1j)*np.random.normal(0,np.sqrt(E_noise/2),size = (2,sample_num,L)))
            
-
+            # ? Generating channel fading gain
             if fading.lower() == "rayleigh":
                 gain = np.random.normal(0, 1/np.sqrt(2), size = (1,sample_num,L)) + \
                     ((0+1j)*np.random.normal(0 ,1/2 ,size = (1,sample_num,L)))
@@ -175,15 +183,20 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
                 logger.error(f"{fading} fading channel is not defined.")
                 return -1
             
+            # ? Tiling Channel fading gain matrix for QPSK data
             gain_qpsk = np.tile(gain,[2,1,1])
-            print(gain_qpsk.shape)
            
+            # ? Tiling QPSK data to simulate L branches
             transmitted_signal = np.dstack((qpsk_data, ) * L)
+
+            # ? Simulating Received signal
             received_signal = gain_qpsk * transmitted_signal + noise
 
             for BER_index, method in enumerate(mode_n):
+
+                # ? Calculating BER for given modes
                 BER[SNR_index, L-1, BER_index] = method_dict[method][1](gain_qpsk, received_signal, sample_num, qpsk_data)
-                logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_dB:<5} No of diversity branches = {L} for fading = R{fading[1:]}")
+                logger.debug(f"BER = {BER[SNR_index, L-1, BER_index]:<10} For Mode :: {method_dict[method][0]:<15} SNR = {SNR_dB:<5} No of diversity branches = {L:<3} for fading = R{fading[1:]}")
 
     sim_time = time.time() - start
     logger.debug(f"Time taken: {sim_time}s")
@@ -192,23 +205,38 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
 
 
 if __name__ =="__main__":
-
-    SAMPLE_NUM = 100000
-    NO_OF_PATHS = 5
-    SNR_ARANGE = (-7, 5, 2)
-    MODE=("mrc", "egc", "selc",)
-    PLOT_TYPE = "mode_comparision"
+  
+    # ? Instantiate the argument parser
+    formatter = lambda prog: argparse.HelpFormatter(prog,max_help_position=65)
+    parser = argparse.ArgumentParser(description='Receiver Diversity combining Simulation', formatter_class=formatter,
+                                    epilog='Read the README for more instructions: https://github.com/Vignesh-Desmond/receiver-diversity-combining/blob/main/README.md')
+    parser.add_argument('-s', '--samplenum', help="Specify the number of sample points to be used for the simulation. Default: 100000", type=int, default=100000)
+    parser.add_argument('-b', '--branches', help="Number of branches (diversity paths) to be simulated. Default: 3", type=int, default=3)
+    parser.add_argument('-e', '--snr', help="SNR(dB) to be simulated in numpy arange format. Default: -7 5 2", nargs=3, metavar=('START_SNR', 'END_SNR', 'SPACING'),type=int, default=[-7,5,2])
+    parser.add_argument('-m', '--mode', help="Receiver Diversity strategies to be simulated. Default: egc mrc selc", nargs="*", metavar=('M1','M2'), type=str, default=["egc", "mrc", "selc"])
+    parser.add_argument('-p', '--plot', help="Plotting type",choices=["independent","channel-comparision","mode-comparision"],type=str, required=True)
     
+    # ? Parse arguments
+    args = parser.parse_args()
+
+    SAMPLE_NUM = args.samplenum
+    NO_OF_PATHS = args.branches
+    SNR_ARANGE = tuple(args.snr)
+    MODE = tuple(args.mode)
+    PLOT_TYPE = args.plot
+
     if PLOT_TYPE == "independent":
+        # * Remove a line if only one channel fading simulation plot is required
         indeplot(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rayleigh",MODE))
         indeplot(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rician",MODE))
         
-    if PLOT_TYPE == "channel_comparision":
+    if PLOT_TYPE == "channel-comparision":
         combiplot_fading(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,MODE)
 
-    if PLOT_TYPE == "mode_comparision":
+    if PLOT_TYPE == "mode-comparision":
         if len(MODE) < 2:
             logger.error("Mode comparision requires a minimum of 2 modes.")
         else:
+            # * Remove a line if only one channel fading simulation plot is required
             combiplot_mode(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rayleigh",MODE))
             combiplot_mode(*simulate_combining(SAMPLE_NUM,NO_OF_PATHS,SNR_ARANGE,"rician",MODE))

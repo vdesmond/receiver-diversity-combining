@@ -95,20 +95,20 @@ def selective(gain_qpsk, rec_data, sample_num, data):
 
 def qpsk_detection(data):
     """
-    This function performs QPSK detection on given data
+    This function performs QPSK demodulation on given data
 
     Args:
-        data (ndarray): Received QPSK data 
+        data (ndarray): Modulated QPSK data 
 
     Returns:
-        [ndarray]: Detected data
+        [ndarray]: Demodulated data
     """
     return (data > 0).astype(int) * 2 - 1
 
 def get_bit_error_rate(arr1, arr2, sample_num):
     """
     This function calculates Bit Error Rate by comparing 2 matrices
-    which are assumed as received data (after QPSK detection) and 
+    which are assumed as received data (after QPSK Demodulation) and 
     original data before transmission
 
     Args:
