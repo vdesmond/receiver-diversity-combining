@@ -364,21 +364,29 @@ if __name__ == "__main__":
     PLOT_TYPE = args.plot
 
     logger.info(
-                    f"Number of sample points: {SAMPLE_NUM}\n"
-                    f"Number of branches: {NO_OF_PATHS}\n"
-                    f"SNR(dB) to be simulated (arange): {SNR_ARANGE}\n"
-                    f"Diversity strategies: {MODE}\n"
-                    f"Plotting type: {PLOT_TYPE}\n"
-                )
+        f"Number of sample points: {SAMPLE_NUM}\n"
+        f"Number of branches: {NO_OF_PATHS}\n"
+        f"SNR(dB) to be simulated (arange): {SNR_ARANGE}\n"
+        f"Diversity strategies: {MODE}\n"
+        f"Plotting type: {PLOT_TYPE}\n"
+    )
 
-    if SAMPLE_NUM < 1000: 
-        logger.warning("Low number of sample points (%d), may cause inaccurate simulations", SAMPLE_NUM)
+    if SAMPLE_NUM < 1000:
+        logger.warning(
+            "Low number of sample points (%d), may cause inaccurate simulations",
+            SAMPLE_NUM,
+        )
 
-    if SNR_ARANGE[1] > 10: 
-        logger.warning("Simulating for High SNR: %d can cause BER to drop to zero", SNR_ARANGE[2])
-    
-    if NO_OF_PATHS > 5: 
-        logger.warning("No of branches is given as %d. This can cause plots to be cluttered", NO_OF_PATHS)
+    if SNR_ARANGE[1] > 10:
+        logger.warning(
+            "Simulating for High SNR: %d can cause BER to drop to zero", SNR_ARANGE[1]
+        )
+
+    if NO_OF_PATHS > 5:
+        logger.warning(
+            "No of branches is given as %d. This can cause plots to be cluttered",
+            NO_OF_PATHS,
+        )
 
     time.sleep(1)
     logger.info("Starting Simulation")

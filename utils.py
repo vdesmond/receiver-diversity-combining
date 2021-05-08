@@ -52,12 +52,12 @@ def maximal_ratio(gain, rec_data, sample_num, data):
     return ber_mrc
 
 
-def direct(gain_qpsk, rec_data, sample_num, data):
+def direct(_, rec_data, sample_num, data):
     """
     This function calculates BER for Direct Combining
 
     Args:
-        gain (ndarray): Placeholer argument as gain matrix is not needed
+        _ (ndarray): Placeholer argument as gain matrix is not needed
         rec_data (ndarray): Receiver data matrix of dimensions (2, sample_num, L)
         sample_num (int): Number of samples
         data (ndarray): QPSK data matrix of dimensions (2, sample_num, L)
