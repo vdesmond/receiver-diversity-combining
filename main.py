@@ -337,7 +337,7 @@ if __name__ == "__main__":
         "--mode",
         help="Receiver Diversity strategies to be simulated. Default: egc mrc selc",
         nargs="*",
-        metavar=("", "M2"),
+        metavar=("M1", "M2"),
         type=str,
         default=["egc", "mrc", "selc"],
     )
@@ -346,7 +346,7 @@ if __name__ == "__main__":
         "--plot",
         help="Plotting type",
         choices=[
-            "independent",
+            "default",
             "channel-comparision",
             "mode-comparision",
         ],
@@ -372,19 +372,19 @@ if __name__ == "__main__":
                 )
 
     if SAMPLE_NUM < 1000: 
-        logger.warn("Low number of sample points (%s), may cause inaccurate simulations", SAMPLE_NUM)
+        logger.warning("Low number of sample points (%d), may cause inaccurate simulations", SAMPLE_NUM)
 
-    if SNR_ARANGE[2] > 10: 
-        logger.warn("Simulating for High SNR: %s can cause BER to drop to zero", SNR_ARANGE[2])
-
+    if SNR_ARANGE[1] > 10: 
+        logger.warning("Simulating for High SNR: %d can cause BER to drop to zero", SNR_ARANGE[2])
+    
     if NO_OF_PATHS > 5: 
-        logger.warn("No of branches is given as %s. This can cause plots to be cluttered", NO_OF_PATHS)
+        logger.warning("No of branches is given as %d. This can cause plots to be cluttered", NO_OF_PATHS)
 
     time.sleep(1)
     logger.info("Starting Simulation")
     time.sleep(1)
 
-    if PLOT_TYPE == "independent":
+    if PLOT_TYPE == "default":
         # * Remove a line if only one channel fading simulation plot is required
         indeplot(
             *simulate_combining(SAMPLE_NUM, NO_OF_PATHS, SNR_ARANGE, "rayleigh", MODE)
@@ -419,3 +419,5 @@ if __name__ == "__main__":
                     MODE,
                 )
             )
+
+    logger.info("Simulation completed successfully")
