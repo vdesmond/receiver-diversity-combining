@@ -56,20 +56,24 @@ DC is basically just summing up all the signals from diversity branches without 
 ### Realisation 
 
 <p align="center">
-  <b>Selection Combining</b><br>
+  <b>Selection Combining</b><br></br>
   <kbd>
   <img src="./docs/sc.svg">
   </kbd>
 </p>
+<br></br>
 <p align="center">
-  <b>Equal Gain Combining</b><br>
+  <b>Equal Gain Combining</b><br></br>
   <kbd>
   <img src="./docs/egc.svg">
   </kbd>
 </p>
+<br></br>
 <p align="center">
-  <b>Maximal Ratio Combining</b><br>
-  <img src="./docs/mrc.png">
+  <b>Maximal Ratio Combining</b><br></br>
+  <kbd>
+  <img src="./docs/mrc.svg">
+  </kbd>
 </p>
 
 ## Code
