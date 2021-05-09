@@ -58,21 +58,21 @@ DC is basically just summing up all the signals from diversity branches without 
 <p align="center">
   <b>Selection Combining</b><br></br>
   <kbd>
-  <img src="./docs/sc.svg">
+  <img src="./docs/svgs/sc.svg">
   </kbd>
 </p>
 <br></br>
 <p align="center">
   <b>Equal Gain Combining</b><br></br>
   <kbd>
-  <img src="./docs/egc.svg">
+  <img src="./docs/svgs/egc.svg">
   </kbd>
 </p>
 <br></br>
 <p align="center">
   <b>Maximal Ratio Combining</b><br></br>
   <kbd>
-  <img src="./docs/mrc.svg">
+  <img src="./docs/svgs/mrc.svg">
   </kbd>
 </p>
 
@@ -124,11 +124,11 @@ Note: The default path for saving plots is [docs](./docs). Change this as per yo
 
 <p align="center">
   <t>With logging level <b>INFO</b> </t><br>
-  <img src="./docs/info.png">
+  <img src="./docs/logs/info.png">
 </p>
 <p align="center">
   <t>With logging level <b>DEBUG</b> </t><br>
-  <img src="./docs/debug.png">
+  <img src="./docs/logs/debug.png">
 </p>
 
 ## Simulation Plots
