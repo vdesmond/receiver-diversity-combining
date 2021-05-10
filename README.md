@@ -1,4 +1,10 @@
 # Receiver Diversity Combining Simulation
+[![MIT license](https://img.shields.io/github/license/Vignesh-Desmond/receiver-diversity-combining?style=for-the-badge)](https://lbesson.mit-license.org/)
+[![made-with-python](https://img.shields.io/badge/numpy-%23013243.svg?&style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org/)
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+
 
 Simulation of various diversity combining strategies at receiver side, namely:
 - Selective Combining
@@ -199,3 +205,11 @@ Note: for branch L = 1, all strategies behave the same, so it is not shown here.
 ### Books
 
 [1] &emsp; T. Rappaport, Wireless Communications: Principles and Practice, 2nd ed., (Upper Saddle River, N.J.: Prentice Hall, 2002).
+
+## License
+
+This software is licensed under the terms of the [MIT License](./LICENSE).
+The [SVG images](./docs/svgs) are licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
