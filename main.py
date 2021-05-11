@@ -289,7 +289,7 @@ def simulate_combining(sample_num, no_of_paths, snr_arange, fading, mode):
                     f" branches = {path:<3} Fading = R{fading[1:]}"
                 )
 
-    logger.debug(f"Time taken: {time.time() - start}s")
+    logger.info(f"Time taken: {time.time() - start}s")
 
     return ber, mode_n, snr_db_list, fading, no_of_paths
 
