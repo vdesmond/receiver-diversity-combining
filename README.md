@@ -63,21 +63,21 @@ DC is basically just summing up all the signals from diversity branches without 
 ### Realisation 
 
 <p align="center">
-  <b>Selection Combining</b><br></br>
+  <b>Selection Combining</b><br><br>
   <kbd>
   <img src="./docs/svgs/sc.svg">
   </kbd>
 </p>
-<br></br>
+<br><br>
 <p align="center">
-  <b>Equal Gain Combining</b><br></br>
+  <b>Equal Gain Combining</b><br><br>
   <kbd>
   <img src="./docs/svgs/egc.svg">
   </kbd>
 </p>
-<br></br>
+<br><br>
 <p align="center">
-  <b>Maximal Ratio Combining</b><br></br>
+  <b>Maximal Ratio Combining</b><br><br>
   <kbd>
   <img src="./docs/svgs/mrc.svg">
   </kbd>
@@ -130,11 +130,11 @@ Note: The default path for saving plots is [docs](./docs). Change this as per yo
 ### Logging Examples
 
 <p align="center">
-  <t>With logging level <b>INFO</b> </t><br>
+  <t>With logging level <b>INFO</b> </t><br><br>
   <img src="./docs/logs/info.png">
 </p>
 <p align="center">
-  <t>With logging level <b>DEBUG</b> </t><br>
+  <t>With logging level <b>DEBUG</b> </t><br><br>
   <img src="./docs/logs/debug.png">
 </p>
 
@@ -148,14 +148,14 @@ Done with
 - SNR: -7, -5, -3, -1, 1, 3
 
 <p align="center">
-  <kbd><img src="./docs/Direct Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Direct Combining - Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Selective Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Selective Combining - Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain Combining - Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Maximal Ratio Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Maximal Ratio Combining - Rician.png"></kbd><br></br>
+  <kbd><img src="./docs/Direct Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Direct Combining - Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Selective Combining - Rayleigh.png"></kbd><<br><br>
+  <kbd><img src="./docs/Selective Combining - Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain Combining - Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Maximal Ratio Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Maximal Ratio Combining - Rician.png"></kbd><br><br>
 </p>
 
 ### Channel Comparision plotting
@@ -166,10 +166,10 @@ Done with
 - SNR: -7, -5, -3, -1, 1, 3
 
 <p align="center">
-  <kbd><img src="./docs/Direct Combining - Rayleigh vs Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Selective Combining - Rayleigh vs Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain Combining - Rayleigh vs Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Maximal Ratio Combining - Rayleigh vs Rician.png"></kbd><br></br>
+  <kbd><img src="./docs/Direct Combining - Rayleigh vs Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Selective Combining - Rayleigh vs Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain Combining - Rayleigh vs Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Maximal Ratio Combining - Rayleigh vs Rician.png"></kbd><br><br>
 </p>
 
 ### Mode Comparision plotting
@@ -183,12 +183,12 @@ Done with
 Note: for branch L = 1, all strategies behave the same, so it is not shown here.
 
 <p align="center">
-  <kbd><img src="./docs/Equal Gain vs Selective Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain vs Selective Combining - Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Maximal Ratio vs Selective Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Maximal Ratio vs Selective Combining - Rician.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain vs Maximal Ratio Combining - Rayleigh.png"></kbd><br></br>
-  <kbd><img src="./docs/Equal Gain vs Maximal Ratio Combining - Rician.png"></kbd><br></br>
+  <kbd><img src="./docs/Equal Gain vs Selective Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain vs Selective Combining - Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Maximal Ratio vs Selective Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Maximal Ratio vs Selective Combining - Rician.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain vs Maximal Ratio Combining - Rayleigh.png"></kbd><br><br>
+  <kbd><img src="./docs/Equal Gain vs Maximal Ratio Combining - Rician.png"></kbd><br><br>
 </p>
 
 ## References
