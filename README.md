@@ -68,14 +68,14 @@ DC is basically just summing up all the signals from diversity branches without 
   <img src="./docs/svgs/sc.svg">
   </kbd>
 </p>
-<br><br>
+
 <p align="center">
   <b>Equal Gain Combining</b><br><br>
   <kbd>
   <img src="./docs/svgs/egc.svg">
   </kbd>
 </p>
-<br><br>
+
 <p align="center">
   <b>Maximal Ratio Combining</b><br><br>
   <kbd>
@@ -150,7 +150,7 @@ Done with
 <p align="center">
   <kbd><img src="./docs/Direct Combining - Rayleigh.png"></kbd><br><br>
   <kbd><img src="./docs/Direct Combining - Rician.png"></kbd><br><br>
-  <kbd><img src="./docs/Selective Combining - Rayleigh.png"></kbd><<br><br>
+  <kbd><img src="./docs/Selective Combining - Rayleigh.png"></kbd><br><br>
   <kbd><img src="./docs/Selective Combining - Rician.png"></kbd><br><br>
   <kbd><img src="./docs/Equal Gain Combining - Rayleigh.png"></kbd><br><br>
   <kbd><img src="./docs/Equal Gain Combining - Rician.png"></kbd><br><br>

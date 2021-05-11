@@ -65,7 +65,6 @@ def direct(_, rec_data, sample_num, data):
     Returns:
         [float]: Bit Error Rate for Direct Combining
     """
-    # ? channel fading is not needed here, the argument is just a placeholder.
     rec_dir = np.sum(rec_data, axis=2)
     rec_dir_real = np.real(rec_dir)
     result_dir = qpsk_detection(rec_dir_real)
@@ -88,13 +87,9 @@ def selective(gain_qpsk, rec_data, sample_num, data):
         [float]: Bit Error Rate for Selective Combining
     """
     max_gain_index = np.argmax(np.absolute(gain_qpsk[1:]), axis=2)
-
-    rec_data_temp = np.zeros((2, sample_num), dtype="complex_")
-    gain_qpsk_temp = np.zeros((2, sample_num), dtype="complex_")
-
-    for i in range(sample_num):
-        rec_data_temp[:, i] = rec_data[:, i, int(max_gain_index[:, i])]
-        gain_qpsk_temp[:, i] = gain_qpsk[:, i, int(max_gain_index[:, i])]
+    indexer = np.arange(0,sample_num)
+    rec_data_temp = rec_data[:, indexer, np.squeeze(max_gain_index)]
+    gain_qpsk_temp = gain_qpsk[:, indexer, np.squeeze(max_gain_index)]
 
     rec_sel = np.exp(0 - 1j * np.angle(gain_qpsk_temp)) * rec_data_temp
     rec_sel_real = np.real(rec_sel)
